@@ -886,3 +886,392 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/*Dark mode theme
+   ============================================ */
+[data-theme='dark'] {
+  --color-bg: #141a12;
+  --color-bg-alt: #1c241a;
+  --color-surface: #202b1d;
+  --color-text: #eaf2e6;
+  --color-text-muted: #9db092;
+  --color-primary: #5cb576;
+  --color-primary-dark: #7fd396;
+  --color-primary-light: #24352a;
+  --color-secondary: #f2825f;
+  --color-secondary-light: #3a2620;
+  --color-amber: #f4c25a;
+  --color-amber-light: #3a301a;
+  --color-border: #2c3828;
+  --color-border-strong: #3c4a37;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme='dark'] .app__bg {
+  background:
+    radial-gradient(600px circle at 8% 0%, var(--color-primary-light) 0%, transparent 55%),
+    radial-gradient(500px circle at 100% 20%, var(--color-secondary-light) 0%, transparent 50%),
+    var(--color-bg);
+}
+
+body {
+  transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out);
+}
+
+.icon-toggle {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s var(--ease-spring), border-color 0.2s;
+}
+
+.icon-toggle:hover {
+  transform: rotate(20deg) scale(1.08);
+  border-color: var(--color-primary);
+}
+
+/* ============================================
+   Boot / loading screen
+   ============================================ */
+.boot-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.boot-screen__seed {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: bloomPulse 1s ease-in-out infinite;
+}
+
+/* ============================================
+   Progress ring
+   ============================================ */
+.progress-ring {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  margin-left: 6px;
+}
+
+.progress-ring__arc {
+  transition: stroke-dashoffset 0.6s var(--ease-out);
+}
+
+.progress-ring__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+/* ============================================
+   User chip
+   ============================================ */
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: 999px;
+  padding: 5px 6px 5px 5px;
+}
+
+.user-chip__avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-chip__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-chip__logout {
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.user-chip__logout:hover {
+  background: var(--color-secondary-light);
+  color: #c23c1f;
+}
+
+/* ============================================
+   Header mobile hamburger
+   ============================================ */
+.header__hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  border: none;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+.header__hamburger span {
+  width: 18px;
+  height: 2px;
+  background: var(--color-text);
+  border-radius: 2px;
+  transition: transform 0.2s;
+}
+
+@media (max-width: 780px) {
+  .header {
+    flex-wrap: nowrap;
+  }
+
+  .header__hamburger {
+    display: flex;
+  }
+
+  .header__controls {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 16px;
+    order: 3;
+  }
+
+  .header__controls--open {
+    display: flex;
+    animation: fadeInDown 0.25s var(--ease-out);
+  }
+
+  .search input {
+    width: 100%;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .user-chip {
+    justify-content: space-between;
+  }
+}
+
+/* ============================================
+   Column sort dropdown
+   ============================================ */
+.column__sort {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-alt);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  outline: none;
+  align-self: flex-start;
+}
+
+.column__sort:focus {
+  border-color: var(--color-primary);
+}
+
+/* ============================================
+   Task card inline confirm-delete
+   ============================================ */
+.task-card__confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--color-secondary-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a3401f;
+  animation: fadeIn 0.2s var(--ease-out);
+}
+
+.task-card__confirm-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.task-card__confirm-btn {
+  border: none;
+  background: white;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  transition: transform 0.15s var(--ease-spring);
+}
+
+.task-card__confirm-btn:hover {
+  transform: scale(1.06);
+}
+
+.task-card__confirm-btn--danger {
+  background: #c23c1f;
+  color: white;
+}
+
+/* ============================================
+   Auth screen
+   ============================================ */
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(600px circle at 8% 0%, var(--color-primary-light) 0%, transparent 55%),
+    radial-gradient(500px circle at 100% 20%, var(--color-secondary-light) 0%, transparent 50%),
+    var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.4s var(--ease-spring);
+}
+
+.auth-card__brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-card__brand svg {
+  animation: sway 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.auth-card__brand h1 {
+  font-size: 24px;
+  color: var(--color-primary-dark);
+  margin: 8px 0 2px;
+}
+
+.auth-card__brand p {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-family: var(--font-display);
+  margin: 0;
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--color-bg-alt);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 22px;
+}
+
+.auth-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  transition: background 0.2s, color 0.2s;
+}
+
+.auth-tab--active {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.auth-error {
+  background: var(--color-secondary-light);
+  color: #a3401f;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  margin: 0 0 14px;
+  animation: fadeInDown 0.2s var(--ease-out);
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  margin: 18px 0 0;
+}
+
+.auth-switch__link {
+  border: none;
+  background: none;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  padding: 0;
+}
+
+.auth-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 14px 0 0;
+  opacity: 0.8;
+}

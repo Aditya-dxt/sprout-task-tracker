@@ -1,12 +1,40 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from './components/Header.jsx';
 import Board from './components/Board.jsx';
 import TaskModal from './components/TaskModal.jsx';
 import Toast from './components/Toast.jsx';
+import AuthScreen from './pages/AuthScreen.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 import useTasks from './hooks/useTasks.js';
 
 export default function App() {
-  const { tasks, loading, error, addTask, editTask, removeTask, moveTask } = useTasks();
+  const { user, loading: authLoading, logout } = useAuth();
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sprout_theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('sprout_theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  if (authLoading) {
+    return (
+      <div className="boot-screen">
+        <div className="boot-screen__seed" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  return (
+    <TaskBoard user={user} onLogout={logout} darkMode={darkMode} onToggleDark={() => setDarkMode((d) => !d)} />
+  );
+}
+
+function TaskBoard({ user, onLogout, darkMode, onToggleDark }) {
+  const { tasks, loading, error, addTask, editTask, removeTask, moveTask } = useTasks(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [filterPriority, setFilterPriority] = useState('all');
@@ -64,6 +92,8 @@ export default function App() {
     });
   }, [tasks, filterPriority, search]);
 
+  const doneCount = useMemo(() => tasks.filter((t) => t.status === 'done').length, [tasks]);
+
   return (
     <div className="app">
       <div className="app__bg" aria-hidden="true" />
@@ -74,6 +104,11 @@ export default function App() {
         search={search}
         setSearch={setSearch}
         taskCount={tasks.length}
+        doneCount={doneCount}
+        user={user}
+        onLogout={onLogout}
+        darkMode={darkMode}
+        onToggleDark={onToggleDark}
       />
       <main className="main">
         {error && <div className="banner banner--error">{error}</div>}

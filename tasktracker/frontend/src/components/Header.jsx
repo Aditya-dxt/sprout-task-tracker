@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import ProgressRing from './ProgressRing.jsx';
+
 export default function Header({
   onAdd,
   filterPriority,
@@ -5,7 +8,14 @@ export default function Header({
   search,
   setSearch,
   taskCount,
+  doneCount,
+  user,
+  onLogout,
+  darkMode,
+  onToggleDark,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="header">
       <div className="header__brand">
@@ -15,20 +25,27 @@ export default function Header({
             fill="var(--color-primary)"
             opacity="0.92"
           />
-          <path
-            d="M20 34C20 34 20 20 20 12"
-            stroke="var(--color-primary-dark)"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
+          <path d="M20 34C20 34 20 20 20 12" stroke="var(--color-primary-dark)" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
         <div>
           <h1>Sprout</h1>
           <p className="header__tagline">Grow your tasks, one bloom at a time</p>
         </div>
+        <ProgressRing total={taskCount} done={doneCount} />
       </div>
 
-      <div className="header__controls">
+      <button
+        className="header__hamburger"
+        onClick={() => setMenuOpen((o) => !o)}
+        aria-label="Toggle menu"
+        aria-expanded={menuOpen}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <div className={`header__controls ${menuOpen ? 'header__controls--open' : ''}`}>
         <div className="search">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
@@ -59,9 +76,28 @@ export default function Header({
           {taskCount} task{taskCount !== 1 ? 's' : ''}
         </span>
 
+        <button
+          className="icon-toggle"
+          onClick={onToggleDark}
+          aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {darkMode ? '☀️' : '🌙'}
+        </button>
+
         <button className="btn btn--primary" onClick={onAdd}>
           <span className="btn__plus">+</span> New task
         </button>
+
+        {user && (
+          <div className="user-chip" title={user.email}>
+            <span className="user-chip__avatar">{user.name?.[0]?.toUpperCase() || '?'}</span>
+            <span className="user-chip__name">{user.name}</span>
+            <button className="user-chip__logout" onClick={onLogout}>
+              Log out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

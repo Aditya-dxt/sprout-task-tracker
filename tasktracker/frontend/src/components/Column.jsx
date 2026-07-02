@@ -1,9 +1,30 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import TaskCard from './TaskCard.jsx';
 import EmptyState from './EmptyState.jsx';
 
+const PRIORITY_WEIGHT = { high: 0, medium: 1, low: 2 };
+
+function sortTasks(tasks, sortBy) {
+  const copy = [...tasks];
+  switch (sortBy) {
+    case 'due':
+      return copy.sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      });
+    case 'priority':
+      return copy.sort((a, b) => PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority]);
+    default:
+      return copy;
+  }
+}
+
 export default function Column({ column, tasks, onEdit, onDelete, onMove, onAdd }) {
   const [isOver, setIsOver] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+
+  const sorted = useMemo(() => sortTasks(tasks, sortBy), [tasks, sortBy]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -37,11 +58,24 @@ export default function Column({ column, tasks, onEdit, onDelete, onMove, onAdd 
         <span className="column__count">{tasks.length}</span>
       </div>
 
+      {tasks.length > 1 && (
+        <select
+          className="column__sort"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          aria-label={`Sort ${column.title} tasks`}
+        >
+          <option value="newest">Newest first</option>
+          <option value="due">By due date</option>
+          <option value="priority">By priority</option>
+        </select>
+      )}
+
       <div className="column__body">
-        {tasks.length === 0 ? (
+        {sorted.length === 0 ? (
           <EmptyState columnId={column.id} onAdd={onAdd} />
         ) : (
-          tasks.map((task, i) => (
+          sorted.map((task, i) => (
             <TaskCard key={task._id} task={task} index={i} onEdit={onEdit} onDelete={onDelete} />
           ))
         )}

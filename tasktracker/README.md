@@ -36,28 +36,45 @@ Under the hood, it's a clean, fully working MERN stack application: a REST API b
 
 ## ✨ Features
 
+### 🔐 Accounts & Data Isolation
+- Sign up / log in with email + password (bcrypt-hashed, JWT sessions)
+- Every task is scoped to its owner — the backend filters every single query by
+  the authenticated user's ID, so one account's tasks can never appear in
+  another account's board, structurally, not just by convention
+- Ready for a future mobile app: the same REST + JWT API can be reused as-is
+
+### ⚡ Real-Time Sync
+- Socket.io connection authenticated with the same JWT
+- Each user joins a private room keyed to their own ID — updates only ever
+  reach that user's own open tabs/devices, never anyone else's
+- Create, edit, delete, or drag a task in one tab and watch it update instantly
+  in another, with no manual refresh
+
 ### ✅ Core Task Management
 - Full CRUD — create, view, update, and delete tasks
 - Drag-and-drop between *To Do → In Progress → Done*
 - Client- and server-side form validation (title required, length limits)
+- Inline confirm-before-delete (no accidental deletes)
+- Sort each column by newest, due date, or priority
 
 ### 🔍 Organization
 - Live search across task titles
 - Filter by priority (low / medium / high)
 - Due dates with automatic overdue highlighting
+- Overall completion progress ring in the header
 
 ### 🎨 Experience
-- Light, botanical-themed UI with rich micro-animations
+- Light **and dark** botanical-themed UI with rich micro-animations
 - Growth-stem indicator on every card that visually reflects task status
 - Toast notifications, skeleton loading states, empty-state illustrations
-- Fully responsive — mobile drawer-friendly layout down to small screens
-- Dynamic updates with no page refresh (pure client-side state + REST calls)
+- Fully responsive with a dedicated mobile nav — usable down to small phone widths
+- Dynamic updates with no page refresh (pure client-side state + REST + sockets)
 
 ### ⚙️ Engineering
 - REST API with proper error handling and status codes
 - MongoDB schema validation via Mongoose
 - Environment-variable driven config (frontend + backend)
-- Clean separation of concerns (routes / controllers / models)
+- Clean separation of concerns (routes / controllers / models / middleware)
 
 ---
 
@@ -65,30 +82,43 @@ Under the hood, it's a clean, fully working MERN stack application: a REST API b
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | React 18 · Vite · Axios · plain CSS (no UI framework) |
-| **Backend** | Node.js · Express · Mongoose |
+| **Frontend** | React 18 · Vite · Axios · Socket.io-client · plain CSS (no UI framework) |
+| **Backend** | Node.js · Express · Mongoose · Socket.io · JWT · bcryptjs |
 | **Database** | MongoDB (Atlas) |
 | **Drag & Drop** | Native HTML5 Drag and Drop API (zero extra dependencies) |
 
 ---
 
 ## 📂 Project Structure
+
 ```
 tasktracker/
 ├── backend/               # Express + MongoDB REST API
 │   ├── config/db.js
-│   ├── controllers/taskController.js
-│   ├── models/Task.js
-│   ├── routes/taskRoutes.js
+│   ├── controllers/
+│   │   ├── authController.js
+│   │   └── taskController.js
+│   ├── middleware/auth.js
+│   ├── models/
+│   │   ├── User.js
+│   │   └── Task.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   └── taskRoutes.js
+│   ├── utils/generateToken.js
 │   └── server.js
 └── frontend/               # React (Vite) client
-└── src/
-├── api/tasks.js
-├── components/
-├── hooks/useTasks.js
-├── App.jsx
-└── index.css
-
+    └── src/
+        ├── api/
+        │   ├── auth.js
+        │   ├── tasks.js
+        │   └── socket.js
+        ├── context/AuthContext.jsx
+        ├── pages/AuthScreen.jsx
+        ├── components/
+        ├── hooks/useTasks.js
+        ├── App.jsx
+        └── index.css
 ```
 
 ---
@@ -109,12 +139,15 @@ tasktracker/
 | Area | Status |
 |---|---|
 | Backend API — CRUD, validation, error handling | ✅ Done |
-| Frontend — board, drag-and-drop, modal form, search/filter | ✅ Done |
+| Authentication (JWT, bcrypt, protected routes) | ✅ Done |
+| Multi-user data isolation (every query scoped to owner) | ✅ Done |
+| Real-time sync (Socket.io, per-user private rooms) | ✅ Done |
+| Frontend — board, drag-and-drop, modal form, search/filter/sort | ✅ Done |
 | MongoDB integration (Mongoose models + schema validation) | ✅ Done |
-| Responsive layout (mobile → desktop) | ✅ Done |
+| Responsive layout (mobile → desktop, dedicated mobile nav) | ✅ Done |
+| Dark mode | ✅ Done |
 | Animations (card entrance, growth stem, bloom, toasts) | ✅ Done |
 | Deployment (backend + frontend on public URLs) | ⏳ In progress |
-| Bonus: notifications / reusable component docs | ✅ Done (toasts, componentized UI) |
 
 ---
 
@@ -125,7 +158,7 @@ tasktracker/
 ```bash
 cd backend
 npm install
-cp .env.example .env       # fill in your real MONGO_URI
+cp .env.example .env       # fill in MONGO_URI and a random JWT_SECRET
 npm run dev                 # → http://localhost:5000
 ```
 
@@ -140,13 +173,18 @@ npm run dev                  # → http://localhost:5173
 
 ### API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/tasks` | List all tasks |
-| GET | `/api/tasks/:id` | Get one task |
-| POST | `/api/tasks` | Create a task |
-| PUT | `/api/tasks/:id` | Update a task |
-| DELETE | `/api/tasks/:id` | Delete a task |
+| Method | Endpoint | Auth required | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | No | Create an account |
+| POST | `/api/auth/login` | No | Log in, receive a JWT |
+| GET | `/api/auth/me` | Yes | Get the current user |
+| GET | `/api/tasks` | Yes | List the current user's tasks |
+| GET | `/api/tasks/:id` | Yes | Get one task (must be owned by caller) |
+| POST | `/api/tasks` | Yes | Create a task |
+| PUT | `/api/tasks/:id` | Yes | Update a task (must be owned by caller) |
+| DELETE | `/api/tasks/:id` | Yes | Delete a task (must be owned by caller) |
+
+Authenticated requests send `Authorization: Bearer <token>`.
 
 ---
 
@@ -156,7 +194,7 @@ npm run dev                  # → http://localhost:5173
 Free cluster, database user, and IP allowlist set up at [cloud.mongodb.com](https://cloud.mongodb.com).
 
 **Backend — Render**
-Root directory `backend`, build command `npm install`, start command `npm start`, with `MONGO_URI` and `PORT` set as environment variables.
+Root directory `backend`, build command `npm install`, start command `npm start`, with `MONGO_URI`, `JWT_SECRET`, and `PORT` set as environment variables.
 
 **Frontend — Vercel**
 Root directory `frontend`, build command `npm run build`, output directory `dist`, with `VITE_API_URL` pointing at the deployed backend's `/api` route.
