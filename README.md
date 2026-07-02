@@ -113,7 +113,7 @@ tasktracker/
 | MongoDB integration (Mongoose models + schema validation) | ✅ Done |
 | Responsive layout (mobile → desktop) | ✅ Done |
 | Animations (card entrance, growth stem, bloom, toasts) | ✅ Done |
-| Deployment (backend + frontend on public URLs) | ⏳ In progress |
+| Deployment (backend + frontend on public URLs) | ✅ Done |
 | Bonus: notifications / reusable component docs | ✅ Done (toasts, componentized UI) |
 
 ---
